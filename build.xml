@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="help" name="btpInt">
+	<property environment="env" />
+	<!-- build.properties必須先載入 -->
+	<property file="build.properties" />
+	<import file="nccc_build.xml" optional="true" />
+	<!--<import file="library.xml" optional="true"/>-->
+	<path id="classpath.runtime">
+		<fileset dir="${lib.runtime.dir}" includes="*.jar" />
+		<pathelement location="${web.classes.dir}" />
+	</path>
+	<path id="classpath.compile">
+		<fileset dir="${lib.compile.dir}" includes="*.jar" />
+		<path refid="classpath.runtime" />
+	</path>
+	<path id="classpath.test">
+		<fileset dir="${lib.test.dir}" includes="*.jar" />
+		<path refid="classpath.compile" />
+		<path refid="classpath.runtime" />
+	</path>
+	<target name="help">
+		<echo level="info" message="===================================================================" />
+		<echo level="info" message="${proj.title} ANT build file." />
+		<echo level="info" message="===================================================================" />
+		<echo level="info" message=" Build file usage :" />
+		<echo level="info" message=" ant [target] " />
+		<echo level="info" message="" />
+		<echo level="info" message=" 其中target可為以下之值, 若未指定, 預設為'help'" />
+		<echo level="info" message="" />
+		<echo level="info" message=" ear-uat       : 建置並包裝中心UAT環境使用(  Portal - EAR File)" />
+		<echo level="info" message=" ear-sit-noVue : 建置並包裝中心SIT環境使用-不含 VUE (   Vue + Portal - EAR File)" />
+		<echo level="info" message=" ear-sit       : 建置並包裝中心SIT環境使用-含 VUE (   Portal - EAR File)" />
+		<echo level="info" message=" ear-prod      : 建置並包裝中心正式環境使用(   Portal - EAR File)" />
+	</target>
+
+	<!-- 以下target已在nccc_build中覆寫, 不可再重覆使用 -->
+	<!--
+	<target name="-before-run-test"/>
+	<target name="-before-war"/>
+	<target name="-after-war"/>
+	-->
+	<!--
+	  - 以下為project中可改寫使用之空白target, 可依實際需求之動作將所需功能加入.
+	  -->
+	<target name="-initial-build-specific-property">
+	</target>
+	<target name="-before-clean" />
+	<target name="-after-clean">
+	</target>
+	<target name="-before-compile-all">
+		<echo message="copy file..." />
+		<mkdir dir="${src.resource.dir}" />
+		<mkdir dir="${src.conf.dir}" />
+		<if>
+			<istrue value="${build.uat}" />
+			<then>
+				<copy todir="${src.resource.dir}" overwrite="true" verbose="true">
+					<fileset dir="${uat.resources}" includes="${copy.resource.includes}" />
+				</copy>
+				<copy todir="${src.conf.dir}" overwrite="true" verbose="true">
+					<fileset dir="${uat.conf}" includes="${copy.conf.includes}" />
+				</copy>
+			</then>
+		</if>
+		<if>
+			<istrue value="${build.sit}" />
+			<then>
+				<copy todir="${src.resource.dir}" overwrite="true" verbose="true">
+					<fileset dir="${sit.resources}" includes="${copy.resource.includes}" />
+				</copy>
+				<copy todir="${src.conf.dir}" overwrite="true" verbose="true">
+					<fileset dir="${sit.conf}" includes="${copy.conf.includes}" />
+				</copy>
+			</then>
+		</if>
+		<if>
+			<istrue value="${build.prod}" />
+			<then>
+				<copy todir="${src.resource.dir}" overwrite="true" verbose="true">
+					<fileset dir="${prod.resources}" includes="${copy.resource.includes}" />
+				</copy>
+				<copy todir="${src.conf.dir}" overwrite="true" verbose="true">
+					<fileset dir="${prod.conf}" includes="${copy.conf.includes}" />
+				</copy>
+			</then>
+		</if>
+	</target>
+
+	<target name="-after-compile-all" />
+	<target name="-before-compile-selected" />
+	<target name="-after-compile-selected" />
+	<target name="-before-copy-java-source" />
+	<target name="-after-copy-java-source" />
+	<target name="-before-copy-resource" />
+	<target name="-after-copy-resource" />
+	<target name="-before-copy-conf" />
+	<target name="-after-copy-conf" />
+	<target name="-before-copy-library" />
+	<target name="-after-copy-library" />
+	<target name="-before-copy-all" />
+
+	<target name="_check-string-exists">
+		<!--
+		<if>
+			<contains string="${stringContent}" substring="${substring}"/>
+			<else>
+				<fail message="${fileName}中 '${substring}' 未設定, 可能是原始設定檔不正確, 請重新檢查."/>
+			</else>
+		</if>
+		-->
+	</target>
+	<target name="-after-copy-all">
+	</target>
+	<target name="-after-run-test" />
+
+	<target name="-before-copy-web-resource" />
+	<target name="-after-copy-web-resource" />
+	<target name="-before-build-project" />
+
+	<target name="-after-build-project" />
+	<target name="-before-rebuild-project" />
+	<target name="-after-rebuild-project" />
+	<target name="-before-copy-ear-conf" />
+	<target name="-after-copy-ear-conf">
+		<!--
+		<loadfile property="applicationContent" failonerror="true" srcfile="${dist.dir}/application.xml" />
+		<foreach target="_check-string-exists" delimiter="," param="substring" list="@{projName}@,@{moduleName}@">
+			<param name="stringContent" value="${applicationContent}" />
+			<param name="fileName" value="application.xml" />
+		</foreach>
+		-->
+		<property name="projName" value="${proj.name}" />
+		<property name="moduleName" value="${proj.context.name}" />
+		<property name="earFileName" value="${proj.name}" />
+		<echo message="projName is ${projName}" level="info" />
+		<echo message="moduleName is ${moduleName}" level="info" />
+		<echo message="earFileName is ${earFileName}" level="info" />
+		<!--
+		<replace file="${dist.dir}/application.xml" token="@{projName}@" value="${projName}" />
+		<replace file="${dist.dir}/application.xml" token="@{moduleName}@" value="${moduleName}" />
+		-->
+	</target>
+	<target name="-before-ear" />
+	<target name="-after-ear" />
+
+</project>

@@ -1,0 +1,71 @@
+/.metadata/
+# 編譯輸出目錄
+/target/
+/out/
+
+# Maven 本地倉庫
+.m2/
+
+# Gradle build 資料夾
+.gradle/
+/build/
+
+# 日誌檔案
+*.log
+/logs/
+/log/
+/tmp/
+
+# 操作系統產生的臨時檔案
+.DS_Store
+Thumbs.db
+
+# IDE 配置檔案
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.ipr
+*.iws
+
+### Eclipse ###
+.project
+.classpath
+.settings/
+bin/
+tmp/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Spring Boot 特有的檔案
+/spring-boot-devtools.properties
+
+# 應用程式配置檔案 (可選, 若有環境特定配置不想提交時使用)
+# application-*.yml
+# application-*.properties
+
+# 資料庫檔案
+*.h2.db
+*.mv.db
+*.ldb
+
+# 使用的系統特有的檔案
+hs_err_pid*
+.recommenders
+
+#index js 跟 css
+/src/main/resources/static/assets/*.css
+/src/main/resources/static/assets/*.js
+
+*.class
+
+/src/main/resources/static/index.html
+
+/web-module/WEB-INF/classes

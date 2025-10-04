@@ -1,0 +1,79 @@
+server:
+  servlet:
+    context-path: /btp
+
+flowable:
+  database-schema-update : false
+  enable-skip-expression: true
+  event-registry:
+      enabled: false
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework: INFO
+    org.springframework.web: DEBUG
+    org.flowable: INFO
+    org.flowable.job.service.impl.asyncexecutor: WARN
+    org.flowable.engine.impl.agenda: WARN
+    org.flowable.common.engine.impl.interceptor: WARN
+
+ftp:
+  ISDFTP:
+    server: 192.168.16.40
+    port: 990
+    user: btpap
+    password: re9y6xjb
+    path: /
+  NCCFTP:
+    server: 192.168.16.180
+    port: 980
+    user: btpap
+    password: xp2m8eni
+    path: /
+  SAP2ASS:
+    server: 192.168.16.180
+    port: 980
+    user: btp2ass
+    password: kb27rhty
+    path: /
+
+application:
+  local-mode: true
+
+spring:
+  jpa:
+    show-sql: true # 顯示SQL語句，用於調試
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+    view:
+      prefix: classpath:/static/
+      suffix: .html
+  thymeleaf:
+    enabled: false
+
+sap:
+  jco:
+    client-ashost: 192.168.18.134
+    client-sysnr: 00
+    client-client: 250
+    client-user: BTP_RFC
+    client-passwd: P@ssw0rdncccHana
+    client-sysid: SIT
+    client-lang: ZF
+    pool-capacity: 20
+    connection-idle-timeout: 1800
+    client-max-pool-wait-time: 10
+
+angela:
+  hsm:
+    ip: https://192.168.13.24:3443
+    key-name: BTP_AES
+    sso-id: BTPv5J72ofCP2fs
+
+locale: zh_TW
+
+security.uri.whitelist: /,/index.html,/assets/**,/favicon.ico,/403Forbidden.html,/user/getCurrentUser,/menu/getMenuTree,/organizationTree/tree,/organizationTree/users,/amlupload/api/remittance,/**

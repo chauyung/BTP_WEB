@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="help" name="NCCC Base Build File for Store">
+	<import file="web_base_build.xml" />
+	<property file="nccc_build.properties" />
+	<!-- 在build前初始化property, 依參數決定呼叫哪一個target -->
+	<target name="-initial-build-project-property" depends="-initial-build-specific-property">
+		<if>
+			<istrue value="${build.local}" />
+			<then>
+				<property name="web.xml" value="${src.conf.dir}/${web.xml.local}" />
+			</then>
+		</if>
+		<if>
+			<istrue value="${build.uat}" />
+			<then>
+				<property name="web.xml" value="${src.conf.dir}/${web.xml.nccc}" />
+			</then>
+		</if>
+		<if>
+			<istrue value="${build.sit}" />
+			<then>
+				<property name="web.xml" value="${src.conf.dir}/${web.xml.nccc}" />
+			</then>
+		</if>
+		<if>
+			<istrue value="${build.prod}" />
+			<then>
+				<property name="web.xml" value="${src.conf.dir}/${web.xml.nccc}" />
+			</then>
+		</if>
+		<property name="web.xml.path" value="${web.xml}" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-initial-build-specific-property" />
+
+	<target name="-before-war">
+		<!-- 在包成WAR之前, 先刪除web.xml, 避免警告訊息 -->
+		<delete file="${web.app}/WEB-INF/web.xml"/>
+	</target>
+
+	<target name="-after-war">
+		<!-- 在包成WAR之後, 複製web.xml, 以便參考 -->
+		<copy file="${web.xml}" tofile="${web.app}/WEB-INF/web.xml" overwrite="true" verbose="true" />
+	</target>
+
+	<target name="-before-run-test" depends="_do-local-property-setup">
+		<property name="build.local" value="true" />
+	</target>
+
+	<target name="build-local" depends="_do-local-property-setup" description="建置本機環境之專案">
+		<property name="build.local" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="build-project" />
+	</target>
+	<target name="rebuild-local" depends="_do-local-property-setup" description="重新建置本機環境之專案">
+		<property name="build.local" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="rebuild-project" />
+	</target>
+	<target name="ear-local" depends="_do-local-property-setup" description="重新建置並包裝本機環境使用之Ear檔案">
+		<property name="build.local" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="ear" />
+	</target>
+	<target name="_do-local-property-setup">
+		<property name="skipLdap" value="true" />
+		<property name="logLevel" value="DEBUG" />
+		<property name="sqlLogLevel" value="INFO" />
+		<property name="authLevel" value="INFO" />
+		<property name="abstractQueryLevel" value="DEBUG" />
+	</target>
+
+	<target name="ear-uat-noVue" depends="_do-nccc-property-setup" description="重新建置並包裝中心UAT環境使用之Ear檔案-不含 VUE">
+		<property name="build.uat" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="ear" />
+	</target>
+	<target name="ear-uat" depends="_do-nccc-property-setup, copy-vue, ear-uat-noVue" description="重新建置並包裝中心測試環境使用之Ear檔案">
+	</target>
+	<target name="ear-sit-noVue" depends="_do-nccc-property-setup" description="重新建置並包裝中心SIT環境使用之Ear檔案-不含 VUE">
+		<property name="build.sit" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="ear" />
+	</target>
+	<target name="ear-sit" depends="_do-nccc-property-setup, copy-vue, ear-sit-noVue" description="重新建置並包裝中心SIT環境使用之Ear檔案-含 VUE">
+	</target>
+	<target name="ear-prod-noVue" depends="_do-nccc-property-setup" description="重新建置並包裝中心PRODUCTION環境使用之Ear檔案-不含 VUE">
+		<property name="build.prod" value="true" />
+		<property name="compress.javascript" value="false" />
+		<runtarget target="ear" />
+	</target>
+	<target name="ear-prod" depends="_do-nccc-property-setup, copy-vue, ear-prod-noVue" description="重新建置並包裝中心正式環境使用之Ear檔案">
+	</target>
+	<target name="_do-nccc-property-setup">
+	</target>
+	
+	<target name="copy-vue" description="將 vue 的前端檔案進行編譯(npm run build)後複制到專案 static">
+		<echo message="Start to build Vue " level="info" />
+		<echo message="       windows env : ${vue.src.path.windows}" level="info" />
+		<echo message="       windows cmd : ${vue.build.windows.cmd}" level="info" />
+		<echo message="       linux   env : ${vue.src.path.linux}" level="info" />
+		<echo message="       linux shell : ${vue.build.linux.cmd}" level="info" />
+		<echo message="         base path : ${basedir}" level="info" />
+		<echo message="        OS Name is : ${os.name}" />
+		
+		<condition property="is_windows">
+			<os family="windows"/>
+		</condition>
+		
+		<!-- delete indicate file as index.html before npm build -->
+		<delete file="${vue.src.path}/dist/index.html" />
+		
+		<if>
+			<istrue value = "${is_windows}"/>
+			<then>
+				<echo message="process build by windows environment : ${vue.build.windows.cmd}" />
+				<property name="vue.src.path" value="${vue.src.path.windows}" />
+				<echo message="vue path : ${vue.src.path}" />
+				
+				<!-- windows cmd -->
+				<exec executable="cmd" output="vueBuild.log" >
+					<arg value="/c ${vue.build.windows.cmd} ${vue.src.path} ${basedir}"/>
+				</exec>
+			</then>
+			<else>
+				<echo message="process build by other(linux) environment : ${vue.build.linux.cmd}" />
+				<property name="vue.src.path" value="${vue.src.path.linux}" />
+				<echo message="vue path : ${basedir}/${vue.src.path}" />
+				
+				<!-- linux cmd -->
+				<!--
+				<exec executable="/bin/ksh" >
+					<arg value="-c"/>
+					<arg value=" . ${basedir}/${vue.build.linux.cmd} ${basedir}/${vue.src.path} ${basedir}"/>
+				</exec>
+				-->
+				<exec executable="/bin/ksh">
+					<arg value="${basedir}/${vue.build.linux.cmd}"/>
+					<arg value="${basedir}/${vue.src.path}"/>
+					<arg value="${basedir}"/>
+				</exec>
+			</else>
+		</if>
+		
+		<!-- check for success -->
+		<echo message="vue path : ${vue.src.path}" />
+		<if>
+			<available file="${vue.src.path}/dist/index.html"/>
+			<then>
+				<echo message="vue build success" level="info" />
+				<!-- Copy File to btp folder -->
+				<!-- delete exist static/assets file -->
+				<delete>
+					<fileset dir="${src.main.resource.dir}/static/assets">
+						<include name="**"/>
+					</fileset>
+				</delete>
+				<copy todir="${src.main.resource.dir}/static" overwrite="true" verbose="true">
+					<fileset dir="${vue.src.path}/dist" />
+				</copy>
+			</then>
+			<else>
+				<fail message="build fail with npm build."/>
+			</else>
+		</if>
+	</target>
+		
+
+
+</project>

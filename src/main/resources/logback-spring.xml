@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 定義日誌輸出格式 -->
+	<property name="LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss} %-5level [%F:%L] - %m%n " />
+
+	<!-- 定義日誌文件的存放路徑 -->
+	<property name="LOG_PATH" value="/u01/APPSVRLOG/LOG/btp" />
+
+	<!-- 定義滾動文件 appender -->
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- 日誌文件的名稱 -->
+		<file>${LOG_PATH}/btp_log.log</file>
+
+		<!-- 滾動策略，按日期滾動 -->
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- 每天生成一個新文件 -->
+			<fileNamePattern>${LOG_PATH}/btp_log-%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+
+			<!-- 保留的文件數量 -->
+			<maxHistory>30</maxHistory>
+
+			<!-- 每個文件的最大大小 (可選) -->
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+
+		<!-- 設定日誌輸出格式 -->
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	<appender name="ERROR_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_PATH}/btp_error.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/btp_error-%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!-- 設定控制台輸出 -->
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- 忽略 MyBatis 類別的 debug log -->
+	<logger name="org.apache.ibatis" level="INFO" />
+	
+	<!-- 忽略 Spring 大量訊息 -->
+	<logger name="org.springframework" level="WARN" />
+	<logger name="org.springframework.boot" level="WARN" />
+	<logger name="org.springframework.web" level="WARN" />
+	<logger name="org.springframework.context" level="WARN" />
+	<logger name="org.springframework.jdbc" level="WARN" />
+	<logger name="org.flowable" level="WARN" />
+	<logger name="org.hibernate" level="WARN" />
+	
+	<!-- 設定日誌的根級別和 appender -->
+	<root level="DEBUG">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="ERROR_FILE" />
+		<appender-ref ref="console" />
+	</root>
+</configuration>

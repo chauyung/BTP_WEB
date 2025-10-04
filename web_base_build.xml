@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="help" name="STS Web Base Build File">
+	<!-- web_base_build.properties必須在base_build.xml之前載入, 因為base_build的參數會由web_base_build帶入 -->
+	<property file="web_base_build.properties" />
+	<import file="base_build.xml" />
+
+	<target name="_do-clean">
+		<delete dir="${dist.dir}" />
+		<delete dir="${web.classes.dir}" />
+	</target>
+
+	<!-- 
+	*******************************************************************************  
+	Javascript Library Copy/Compress section begin 
+	*******************************************************************************  
+	-->
+	<!--
+	<target name="copy-javascript" description="複製Javascript檔案至Web Module中.">
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset dir="${web.javascript.dir}" includes="**/*.*"/>
+		</delete>
+		<copy todir="${web.javascript.dir}">
+			<fileset dir="${src.javascript.dir}" includes="${copy.javascript.includes}" excludes="${copy.javascript.excludes}"/>
+		</copy>
+		<if>
+			<istrue value="${compress.javascript}"/>
+			<then>
+				<runtarget target="compress-javascript"/>
+			</then>
+		</if>
+	</target>
+	<target name="compress-javascript" description="壓縮所有的javascript檔案.">
+		<foreach param="filePath" target="_do-compress-javascript">
+			<path>
+				<fileset dir="${web.javascript.dir}" 
+					includes="${javascript.compress.includes}" excludes="${javascript.compress.excludes}"/>
+			</path>
+		</foreach>
+	</target>
+	
+	<target name="compress-javascript">
+		<java jar="${lib.compile.dir}/${javascript.compressor.jar}" fork="true">
+			<arg value="${filePath}"/>
+			<arg value="-o"/>
+			<arg value="${filePath}"/>
+		</java>
+	</target>
+	-->
+	<!-- ***** Javascript Library Copy/Compress section end ***** -->
+
+	<!-- 
+	*******************************************************************************  
+	Copy Source/Resource/Library section begin 
+	*******************************************************************************  
+	-->
+	<target name="copy-web-resource" description="Copy web resources至對應之目錄下." depends="-before-copy-web-resource, _do-copy-web-resource, -after-copy-web-resource" />
+	<target name="_do-copy-web-resource">
+		<if>
+			<isset property="web.xml.path" />
+			<else>
+				<property name="web.xml.path" value="${web.app}/web.xml" />
+			</else>
+		</if>
+		<echo level="info" message="${web.xml.path}" />
+		<copy file="${web.xml.path}" tofile="${web.app}/WEB-INF/web.xml" overwrite="true" verbose="true" />
+		<copy todir="${web.app}/WEB-INF" overwrite="true" verbose="true">
+			<fileset dir="${src.conf.dir}" includes="${copy.conf.includes}" excludes="${copy.conf.excludes}" />
+		</copy>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-web-resource" />
+	<target name="-after-copy-web-resource" />
+	<!-- ***** Copy Source/Resource/Library section end ***** -->
+
+
+
+	<target name="build-project" description="建置專案." depends="-initial-build-project-property, -before-build-project, _do-build-project, -after-build-project" />
+	<target name="_do-build-project" depends="compile-all, copy-web-resource, copy-all" />
+	<!-- placeholder, for extension used. -->
+	<target name="-initial-build-project-property" />
+	<target name="-before-build-project" />
+	<target name="-after-build-project" />
+
+	<target name="rebuild-project" description="重新建置專案." depends="clean, -before-rebuild-project, _do-rebuild-project, -after-rebuild-project" />
+	<target name="_do-rebuild-project">
+		<!-- 當要建置Web專案時, 若未指定是否壓縮javascript時, 就預設為true. -->
+		<!--
+		<if>
+			<not>
+				<isset property="compress.javascript"/>
+			</not>
+			<then>
+				<property name="compress.javascript" value="true"/>
+			</then>
+		</if>
+		-->
+		<runtarget target="build-project" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-rebuild-project" />
+	<target name="-after-rebuild-project" />
+
+
+	<target name="war" depends="rebuild-project, -before-war, _do-war, -after-war" description="重新建置專案並包裝成War檔案." />
+	<target name="_do-war">
+		<fail unless="web.xml.path" message="參數 'web.xml.path' 必須設定." />
+		<mkdir dir="${dist.dir}" />
+		<copy todir="${dist.dir}/web" includeemptydirs="true">
+			<fileset dir="${web.app}" excludes="${war.excludes}" />
+		</copy>
+		<!-- 壓縮JavaScript -->
+		<!--
+		<if>
+			<istrue value="${compress.javascript}"/>
+			<then>
+				<foreach param="filePath" target="compress-javascript">
+					<path>
+						<fileset dir="${dist.dir}/web/${javascript.dir}" includes="${javascript.compress.includes}" excludes="${javascript.compress.excludes}"/>
+					</path>
+				</foreach>
+			</then>
+		</if>
+		-->
+		<war destfile="${dist.dir}/web-module.war" webxml="${web.xml.path}">
+			<fileset dir="${dist.dir}/web" excludes="${war.excludes}" />
+		</war>
+		<delete dir="${dist.dir}/web" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-war" />
+	<target name="-after-war" />
+
+	<target name="copy-ear-conf" depends="-before-copy-ear-conf, _do-copy-ear-conf, -after-copy-ear-conf" />
+	<target name="_do-copy-ear-conf">
+		<copy file="${web.xml.path}" tofile="${dist.dir}/web-module.xml" />
+		<copy file="${src.application.xml.dir}/application.xml" tofile="${dist.dir}/application.xml" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-ear-conf" />
+	<target name="-after-copy-ear-conf" />
+
+	<target name="ear" depends="-before-ear, _do-ear, -after-ear" description="重新建置專案並包裝成Ear檔案." />
+	<target name="_do-ear" depends="war, copy-ear-conf">
+		<fail unless="earFileName" message="參數 'earFileName' 必須設定." />
+
+		<ear destfile="${dist.dir}/${earFileName}.ear" appxml="${dist.dir}/application.xml" duplicate="fail">
+			<fileset file="${dist.dir}/web-module.war" />
+			<fileset file="${dist.dir}/web-module.xml" />
+			<fileset file="${src.conf.dir}/${server.web.conf}" />
+			<metainf dir="${src.conf.dir}" includes="${server.app.conf}" />
+			<metainf dir="." includes="${server.app.metainf.includes}" />
+		</ear>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-ear" />
+	<target name="-after-ear" />
+
+</project>

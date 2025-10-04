@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://example.com/finalExample" exporter="Flowable Open Source Modeler" exporterVersion="6.8.1">
+  <process id="AcceptanceForm-Main" name="AcceptanceForm-Main" isExecutable="true">
+    <startEvent id="start" name="開始" flowable:formFieldValidation="true"></startEvent>
+    <exclusiveGateway id="gw-check-finish" name="Check Finish"></exclusiveGateway>
+    <sequenceFlow id="f-start-gw" sourceRef="start" targetRef="gw-check-finish"></sequenceFlow>
+    <endEvent id="end" name="結束"></endEvent>
+    <callActivity id="ca-dynamic" name="Run Module" calledElement="${'AcceptanceForm-'.concat(nextModule)}" flowable:calledElementType="key" flowable:fallbackToDefaultTenant="false">
+      <extensionElements>
+        <flowable:in source="businessKey" target="businessKey"></flowable:in>
+        <flowable:in source="amount" target="amount"></flowable:in>
+        <flowable:in source="contractor" target="contractor"></flowable:in>
+        <flowable:in source="nextAssignee" target="nextAssignee"></flowable:in>
+        <flowable:in source="approvers" target="approvers"></flowable:in>
+        <flowable:in source="approvalApprovers" target="approvalApprovers"></flowable:in>
+        <flowable:in source="currentIndex" target="currentIndex"></flowable:in>
+        <flowable:in source="currentApprover" target="currentApprover"></flowable:in>
+        <flowable:in source="countersignApprovers" target="countersignApprovers"></flowable:in>
+        <flowable:in source="rejectedCount" target="rejectedCount"></flowable:in>
+        <flowable:in source="accountingClerk" target="accountingClerk"></flowable:in>
+        <flowable:in source="accountingSectionChief" target="accountingSectionChief"></flowable:in>
+        <flowable:in source="accountingManager" target="accountingManager"></flowable:in>
+        <flowable:in source="accountingAssociate" target="accountingAssociate"></flowable:in>
+        <flowable:in source="accountingSeniorAssociate" target="accountingSeniorAssociate"></flowable:in>
+        <flowable:in source="sapUser" target="sapUser"></flowable:in>
+        <flowable:in source="incomeTaxProcessor" target="incomeTaxProcessor"></flowable:in>
+        <flowable:in source="auditOffice" target="auditOffice"></flowable:in>
+        <flowable:in source="administrativeManager" target="administrativeManager"></flowable:in>
+        <flowable:in source="vicePresident" target="vicePresident"></flowable:in>
+        <flowable:in source="president" target="president"></flowable:in>
+        <flowable:in source="assetManager" target="assetManager"></flowable:in>
+        <flowable:in source="assetManagerSupervisor" target="assetManagerSupervisor"></flowable:in>
+        <flowable:in source="taskAssignment1" target="taskAssignment1"></flowable:in>
+        <flowable:in source="taskAssignment2" target="taskAssignment2"></flowable:in>
+        <flowable:out source="currentIndex" target="currentIndex"></flowable:out>
+        <flowable:out source="currentApprover" target="currentApprover"></flowable:out>
+        <flowable:out source="rejectedCount" target="rejectedCount"></flowable:out>
+        <flowable:out source="nextModule" target="nextModule"></flowable:out>
+      </extensionElements>
+    </callActivity>
+    <receiveTask id="waitNext" name="Wait nextModule"></receiveTask>
+    <sequenceFlow id="f-call-wait" sourceRef="ca-dynamic" targetRef="waitNext"></sequenceFlow>
+    <sequenceFlow id="f-gw-end" sourceRef="gw-check-finish" targetRef="end">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${nextModule == 'finish'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="f-wait-gw" sourceRef="waitNext" targetRef="gw-check-finish"></sequenceFlow>
+    <sequenceFlow id="f-gw-to-call" sourceRef="gw-check-finish" targetRef="ca-dynamic">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${nextModule != 'finish'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AcceptanceForm-Main">
+    <bpmndi:BPMNPlane bpmnElement="AcceptanceForm-Main" id="BPMNPlane_AcceptanceForm-Main">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="30.0" width="30.0" x="100.0" y="144.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="gw-check-finish" id="BPMNShape_gw-check-finish">
+        <omgdc:Bounds height="40.0" width="40.0" x="180.0" y="139.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="27.999999999999996" width="28.0" x="185.99999871850014" y="14.999999776482586"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ca-dynamic" id="BPMNShape_ca-dynamic">
+        <omgdc:Bounds height="59.99999999999997" width="100.00000000000006" x="419.999990463257" y="128.99999807775023"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="waitNext" id="BPMNShape_waitNext">
+        <omgdc:Bounds height="60.0" width="100.0" x="609.9999848008159" y="128.9999961555005"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="f-wait-gw" id="BPMNEdge_f-wait-gw" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="659.6874895630754" y="188.94999615550051"></omgdi:waypoint>
+        <omgdi:waypoint x="659.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="178.91034932221066"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f-call-wait" id="BPMNEdge_f-call-wait" flowable:sourceDockerX="50.000000000000036" flowable:sourceDockerY="29.999999999999986" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
+        <omgdi:waypoint x="519.9499892326406" y="158.999997571895"></omgdi:waypoint>
+        <omgdi:waypoint x="609.9999848007449" y="158.99999666084983"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f-gw-end" id="BPMNEdge_f-gw-end" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="13.999999999999998">
+        <omgdi:waypoint x="199.9999998028462" y="139.0"></omgdi:waypoint>
+        <omgdi:waypoint x="199.99999871850014" y="42.94992983015205"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f-start-gw" id="BPMNEdge_f-start-gw" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="129.9499974717603" y="159.0"></omgdi:waypoint>
+        <omgdi:waypoint x="180.0" y="159.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="f-gw-to-call" id="BPMNEdge_f-gw-to-call" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.000000000000036" flowable:targetDockerY="29.999999999999986">
+        <omgdi:waypoint x="219.94630706517296" y="158.99999985761113"></omgdi:waypoint>
+        <omgdi:waypoint x="419.999990463257" y="158.99999843336641"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

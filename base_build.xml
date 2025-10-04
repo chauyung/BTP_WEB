@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="BIG5"?>
+<project basedir="." default="help" name="Base Build File">
+	<property file="base_build.properties" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<fileset dir="${lib.compile.dir}" includes="*.jar" />
+		</classpath>
+	</taskdef>
+	<target name="help">
+	</target>
+	<!-- 
+	*******************************************************************************  
+	Clean up section begin 
+	*******************************************************************************  
+	-->
+	<target name="clean" description="清除系統建置的所有暫時目錄" depends="-before-clean, _do-clean, -after-clean" />
+	<!-- placeholder, for extension used. -->
+	<target name="_do-clean" />
+	<target name="-before-clean" />
+	<target name="-after-clean" />
+	<!-- ***** Clean up section end ***** -->
+
+
+	<!-- 
+	*******************************************************************************  
+	Compile Source Code section begin 
+	*******************************************************************************  
+	-->
+	<target name="_do-compile">
+		<echo level="info" message="build.classes.dir = ${build.classes.dir}" />
+		<echo level="info" message="web.app = ${web.app}" />
+		<echo level="info" message="web.lib.dir= ${web.lib.dir}" />
+
+		<fail unless="compile.files">Must set property 'compile.files'.</fail>
+		<mkdir dir="${build.classes.dir}" />
+		<javac destdir="${build.classes.dir}" srcdir="${src.java.dir}" includes="${compile.files}" deprecation="true" debug="true" source="${compile.source}" target="${compile.target}" fork="true" memoryInitialSize="128m" memoryMaximumSize="1024m" includeantruntime="false">
+			<compilerarg line="-encoding utf-8" />
+			<classpath refid="classpath.compile" />
+		</javac>
+	</target>
+
+	<target name="compile-all" description="Compile所有原始碼." depends="-before-compile-all, _do-compile-all, -after-compile-all" />
+	<target name="_do-compile-all">
+		<antcall target="_do-compile">
+			<param name="compile.files" value="**/*.java" />
+		</antcall>
+		<if>
+			<and>
+				<isset property="src.jasper.dir" />
+				<istrue value="${precompile.jasper}" />
+			</and>
+			<then>
+				<runtarget target="compile-jasper" />
+			</then>
+		</if>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-compile-all" />
+	<target name="-after-compile-all" />
+
+	<target name="compile-selected" description="Compile 指定之檔案" depends="-before-compile-selected, _do-compile-selected, -after-compile-selected" />
+	<target name="_do-compile-selected">
+		<if>
+			<isset property="compile.files" />
+			<else>
+				<input addproperty="compile.files" defaultvalue="**/*.*" message="輸入檔名(含package路徑, 亦可以pattern方式表示), 若不輸入則Compile全部檔案:" />
+			</else>
+		</if>
+		<runtarget target="_do-compile" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-compile-selected" />
+	<target name="-after-compile-selected" />
+
+	<target name="compile-jasper" description="Compiles Jasper的報表設計檔(XML).">
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
+			<classpath refid="classpath.compile" />
+		</taskdef>
+		<jrc srcdir="${src.jasper.dir}" keepjava="false" tempdir="${build.classes.dir}" destdir="${build.classes.dir}" includes="**/*.jrxml">
+			<classpath refid="classpath.compile" />
+		</jrc>
+	</target>
+	<!-- ***** Compile Source Code section end ***** -->
+
+
+	<!-- 
+	*******************************************************************************  
+	Copy Source/Resource/Library section begin 
+	*******************************************************************************  
+	-->
+	<target name="copy-java-source" description="Copy java source中非java之其他檔案至${build.classes.dir}路徑下." depends="-before-copy-java-source, _do-copy-java-source, -after-copy-java-source" />
+	<target name="_do-copy-java-source">
+		<copy todir="${build.classes.dir}" overwrite="true" verbose="true">
+			<fileset dir="${src.java.dir}" excludes="${copy.java.excludes}" />
+		</copy>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-java-source" />
+	<target name="-after-copy-java-source" />
+
+	<target name="copy-resource" description="Copy resources(resource, main/resource)至${build.resource.dir}路徑下." depends="-before-copy-resource, _do-copy-resource, -after-copy-resource" />
+	<target name="_do-copy-resource">
+		<copy todir="${build.resource.dir}" overwrite="true" verbose="true">
+			<fileset dir="${src.main.resource.dir}" includes="${copy.resource.includes}" />
+		</copy>
+		<copy todir="${build.resource.dir}" overwrite="true" verbose="true">
+			<fileset dir="${src.resource.dir}" includes="${copy.resource.includes}" />
+		</copy>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-resource" />
+	<target name="-after-copy-resource" />
+
+	<target name="copy-conf" description="Copy configuration files至${build.conf.dir}路徑下." depends="-before-copy-conf, _do-copy-conf, -after-copy-conf" />
+	<target name="_do-copy-conf">
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-conf" />
+	<target name="-after-copy-conf" />
+
+	<target name="copy-library" description="Copy libraries至${build.lib.dir}路徑下." depends="-before-copy-library, _do-copy-library, -after-copy-library" />
+	<target name="_do-copy-library">
+		<!-- 當'lib.runtime.dir'及'build.lib.dir'均有設定, 且兩個指向不同目錄時, 才需要做copy -->
+		<condition property="copy.library" value="true">
+			<and>
+				<isset property="lib.runtime.dir" />
+				<isset property="build.lib.dir" />
+				<not>
+					<equals arg1="${lib.runtime.dir}" arg2="${build.lib.dir}" />
+				</not>
+			</and>
+		</condition>
+		<if>
+			<istrue value="${copy.library}" />
+			<then>
+				<copy todir="${build.lib.dir}" overwrite="true" verbose="true">
+					<fileset dir="${lib.runtime.dir}" includes="${copy.lib.includes}" />
+				</copy>
+			</then>
+		</if>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-library" />
+	<target name="-after-copy-library" />
+
+	<target name="copy-all" description="Copy all defined resources." depends="-before-copy-all, _do-copy-all, -after-copy-all" />
+	<target name="_do-copy-all">
+		<runtarget target="copy-java-source" />
+		<runtarget target="copy-resource" />
+		<runtarget target="copy-conf" />
+		<runtarget target="copy-library" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-copy-all" />
+	<target name="-after-copy-all" />
+	<!-- ***** Copy Source/Resource/Library section end ***** -->
+
+
+	<!-- 
+	*******************************************************************************  
+	Run Program section begin 
+	*******************************************************************************  
+	-->
+	<target name="run-selected-file" description="執行指定的程式.">
+		<fail unless="runclass">Must set property 'runclass'</fail>
+		<java classname="${runclass}">
+			<classpath refid="classpath.runtime" />
+			<classpath refid="classpath.compile" />
+		</java>
+	</target>
+	<!-- ***** Run Program section end ***** -->
+
+
+	<!-- 
+	*******************************************************************************  
+	Testing section begin 
+	*******************************************************************************  
+	-->
+	<target name="run-selected-test-file" description="執行指定的程式.">
+		<fail unless="runclass">Must set property 'runclass'</fail>
+		<java classname="${runclass}">
+			<classpath refid="classpath.test" />
+		</java>
+	</target>
+	<target name="_do-compile-test">
+		<fail unless="compile.files">Must set property 'compile.files'.</fail>
+		<javac destdir="${build.classes.dir}" srcdir="${src.test.dir}" includes="${compile.files}" deprecation="true" debug="true" source="${compile.source}" target="${compile.target}" encoding="${compile.encoding}" fork="true" memoryInitialSize="128m" memoryMaximumSize="256m">
+			<classpath refid="classpath.test" />
+		</javac>
+		<copy todir="${build.classes.dir}" overwrite="true" verbose="true">
+			<fileset dir="${src.test.dir}" excludes="**/.*">
+				<not>
+					<filename name="**/*.java" />
+				</not>
+			</fileset>
+		</copy>
+	</target>
+	<target name="compile-test-all" description="Compile所有測試原始碼.">
+		<antcall target="_do-compile-test">
+			<param name="compile.files" value="**/*.java" />
+		</antcall>
+	</target>
+	<target name="run-test" depends="-before-run-test, _do-run-test, -after-run-test" description="會Compile所有source code(含測試)並執行測試程式, 若未指定參數, 會執行所有測試程式." />
+	<target name="_do-run-test" depends="compile-all, compile-test-all">
+		<delete dir="${doc.test.report.dir}" />
+		<mkdir dir="${doc.test.report.dir}" />
+		<condition property="isTestAll" value="false">
+			<not>
+				<or>
+					<isset property="testcase" />
+					<isset property="testcases" />
+				</or>
+			</not>
+		</condition>
+		<junit printsummary="yes" errorproperty="test.error" failureproperty="test.failure" fork="yes" showoutput="false">
+			<classpath refid="classpath.test" />
+			<formatter type="xml" />
+			<test name="${testcase}" todir="${doc.test.report.dir}" if="testcase" />
+			<batchtest todir="${doc.test.report.dir}" if="testcases">
+				<fileset dir="${build.classes.dir}" excludes="${test.testcases.excludes}">
+					<include name="${testcases}" />
+				</fileset>
+			</batchtest>
+			<batchtest todir="${doc.test.report.dir}" if="isTestAll">
+				<fileset dir="${build.classes.dir}" excludes="${test.testcases.excludes}">
+					<include name="**/*Test.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="${doc.test.report.dir}">
+			<fileset dir="${doc.test.report.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${doc.test.report.dir}" />
+		</junitreport>
+		<fail message="Tests failed. Check report for details." if="test.failure" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-run-test" />
+	<target name="-after-run-test" />
+	<!-- ***** Testing Program section end ***** -->
+
+
+
+	<!-- 
+	*******************************************************************************  
+	Code Generartion section begin 
+	*******************************************************************************  
+	-->
+	<target name="code-gen-jaxb" description="由XSD產生程式碼">
+		<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+			<classpath refid="classpath.runtime" />
+			<classpath refid="classpath.compile" />
+		</taskdef>
+		<mkdir dir="${src.schema.dir}/java" />
+		<!--
+		若要產生JDK 5的source code, 必須使用以下指令. source及target指的是JAXB的版本, 1.0, 2.0及2.1
+		<xjc package="proj.nccc.ems.xsd" destdir="${src.schema.dir}/java" removeoldoutput="true" source="2.0" target="2.0>
+		-->
+		<!--
+		<xjc package="${src.schema.generated.package}" target="${src.schema.dir}/java" removeoldoutput="true" source="1.0">
+		-->
+		<xjc package="${src.schema.generated.package}" target="${src.schema.dir}/java" removeoldoutput="true">
+			<schema dir="${src.schema.dir}" includes="*.xsd" />
+			<produces dir="${src.schema.dir}/java/${src.schema.generated.package}" includes="**/*.java" />
+		</xjc>
+		<javac srcdir="${src.schema.dir}/java" debug="true" deprecation="true" source="${compile.source}" target="${compile.target}" fork="true" memoryInitialSize="128m" memoryMaximumSize="256m">
+			<classpath refid="classpath.runtime" />
+		</javac>
+		<jar basedir="${src.schema.dir}/java" destfile="${build.lib.dir}/${src.schema.generated.jar}" excludes="**/*.java" />
+	</target>
+	<!-- ***** Code Generartion section end ***** -->
+
+
+	<!-- 
+	*******************************************************************************  
+	Package Component for Other System section begin
+	本Section定義之target主要是給其他系統呼叫, 以便建立該系統所需之元件, 不應在本project中使用.
+	*******************************************************************************  
+	-->
+	<target name="compile-component" description="依指定之參數compile程式" depends="-before-compile-component, _do-compile-component, -after-compile-component" />
+	<target name="_do-compile-component">
+		<fail unless="component.files">Must set property 'component.files'.</fail>
+		<fail unless="component.compile.source">Must set property 'component.compile.source'.</fail>
+		<fail unless="component.compile.target">Must set property 'component.compile.target'.</fail>
+		<mkdir dir="componentDir" />
+		<javac destdir="componentDir" srcdir="${src.java.dir}" includes="${component.files}" deprecation="true" debug="true" source="${component.compile.source}" target="${component.compile.target}" encoding="${compile.encoding}" fork="true" memoryInitialSize="128m" memoryMaximumSize="256m">
+			<classpath refid="component.classpath" />
+		</javac>
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-compile-component" />
+	<target name="-after-compile-component" />
+
+	<!--
+	- 依指定之參數compile程式, 並包裝成Jar檔案. 呼叫本target需設定以下的property:
+	- 1. component.files : 要compile的原始碼
+	- 2. component.compile.source : javac的source parameter
+	- 3. component.compile.target : javac的target parameter
+	- 4. component.jar.file : Jar檔的名稱
+	- 5. component.jar.dest : Jar檔建置完畢後要放置的位子
+	- 6. component.classpath : reference id, 指向要使用的classpath
+	-->
+	<target name="jar-component" description="依指定之參數compile程式(呼叫compile-component), 並包裝成Jar檔案" depends="compile-component, -before-jar-component, _do-jar-component, -after-jar-component" />
+	<target name="_do-jar-component">
+		<fail unless="component.jar.dest">Must set property 'component.jar.dest'.</fail>
+		<fail unless="component.jar.file">Must set property 'component.jar.file'.</fail>
+		<jar basedir="componentDir" jarfile="${component.jar.dest}/${component.jar.file}" />
+		<delete dir="componentDir" />
+	</target>
+	<!-- placeholder, for extension used. -->
+	<target name="-before-jar-component" />
+	<target name="-after-jar-component" />
+	<!-- ***** Package Component for Other System section end ***** -->
+
+
+
+	<!-- 
+	*******************************************************************************  
+	Code Generartion section begin 
+	*******************************************************************************  
+	-->
+	<target name="javadoc" description="產生本project的javadoc.">
+		<delete dir="${doc.javadoc.dir}" />
+		<mkdir dir="${doc.javadoc.dir}" />
+		<javadoc destdir="${doc.javadoc.dir}" author="yes" version="yes" use="yes" windowtitle="${proj.title} API Documentation">
+			<packageset dir="${src.java.dir}" />
+		</javadoc>
+	</target>
+	<target name="todo-doc" description="產生本project的todo document.">
+		<delete dir="${doc.todo.dir}" />
+		<mkdir dir="${doc.todo.dir}" />
+		<taskdef name="tododoc" classname="xdoclet.modules.doc.DocumentDocletTask" />
+		<tododoc destdir="${doc.todo.dir}">
+			<fileset dir="${src.java.dir}" includes="**/*.java" />
+			<info header="To-Do List" projectname="${proj.title} ToDo Documentation" tag="todo" />
+		</tododoc>
+	</target>
+	<target name="fixme-doc" description="產生本project的fixme document.">
+		<delete dir="${doc.fixme.dir}" />
+		<mkdir dir="${doc.fixme.dir}" />
+		<taskdef name="fixmedoc" classname="xdoclet.modules.doc.DocumentDocletTask" />
+		<fixmedoc destdir="${doc.fixme.dir}">
+			<fileset dir="${src.java.dir}" includes="**/*.java" />
+			<info header="FixMe List" projectname="${proj.title} FixMe Documentation" tag="fixme" />
+		</fixmedoc>
+	</target>
+	<target name="all-doc" depends="javadoc, todo-doc, fixme-doc" description="產生本project的javadoc, todo-doc, fixme-doc" />
+	<!-- ***** Document section end ***** -->
+</project>
