@@ -2,6 +2,7 @@ package nccc.btp.entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -9,136 +10,308 @@ import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+/**
+ * 報表管理：設備項目資料檔(Eitity)
+ * ------------------------------------------------------
+ * 修訂人員: ChauYung
+ * 修訂日期: 2025-10-08
+ */
 @Entity
 @Table(name = "EMS_MEQ_ITEM")
 @NamedQuery(name = "EmsMeqItem.findAll", query = "SELECT e FROM EmsMeqItem e")
 public class EmsMeqItem implements Serializable {
-
   private static final long serialVersionUID = 1L;
 
   @EmbeddedId
   private EmsMeqItemId id;
 
+  /**
+   * SERIAL_NO或SAM卡號碼
+   */
   @Column(name = "SERIAL_NO", length = 30)
   private String serialNo;
 
+  /**
+   * SEQ NO
+   */
   @Column(name = "PUR_SEQ_NO", length = 10)
   private String purSeqNo;
 
+  /**
+   * 設備代號
+   */
   @Column(name = "EQ_NO", length = 15)
   private String eqNo;
 
+  /**
+   * 特店代號
+   */
   @Column(name = "MCHT_NO", length = 15)
   private String mchtNo;
 
+  /**
+   * 機型代號
+   */
   @Column(name = "MODEL_NO", length = 10)
   private String modelNo;
 
+  /**
+   * 庫存狀態(EQ_STATUS)
+   */
   @Column(name = "STATUS", length = 10)
   private String status;
 
+  /**
+   * 位置
+   */
   @Column(name = "LOCATION", length = 10)
   private String location;
 
+  /**
+   * 進貨日期
+   */
   @Column(name = "PUR_DATE", length = 8)
   private String purDate;
 
+  /**
+   * 最後入庫日期
+   */
   @Column(name = "STOCK_DATE", length = 8)
   private String stockDate;
 
+  /**
+   * 廠商代號
+   */
   @Column(name = "VENDOR_ID", length = 10)
   private String vendorId;
 
+  /**
+   * 保固期限
+   */
   @Column(name = "WARR_MONTH")
   private Integer warrMonth;
 
+  /**
+   * 保固開始日期
+   */
   @Column(name = "WARR_ST_DATE", length = 8)
   private String warrStDate;
 
+  /**
+   * 保固到期日期
+   */
   @Column(name = "WARR_EN_DATE", length = 8)
   private String warrEnDate;
 
+  /**
+   * 計費開始日期
+   */
   @Column(name = "FEES_ST_DATE", length = 8)
   private String feesStDate;
 
+  /**
+   * CHARGE FLAG
+   */
   @Column(name = "CHARGE_FLAG", length = 1)
   private String chargeFlag;
 
+  /**
+   * 是否共用
+   */
   @Column(name = "SHARE_FLAG", length = 1)
   private String shareFlag;
 
+  /**
+   * 啟用日期
+   */
   @Column(name = "START_DATE", length = 8)
   private String startDate;
 
+  /**
+   * 停用日期
+   */
   @Column(name = "END_DATE", length = 8)
   private String endDate;
 
+  /**
+   * 備註
+   */
   @Column(name = "REMARK", length = 500)
   private String remark;
 
+  /**
+   * 建檔人員
+   */
   @Column(name = "CREATE_USER", length = 50)
   private String createUser;
 
+  /**
+   * 建檔日期
+   */
   @Column(name = "CREATE_DATE")
   private LocalDate createDate;
 
+  /**
+   * LAST_UPDATE_USER
+   */
   @Column(name = "LAST_UPDATE_USER", length = 50, nullable = false)
   private String lastUpdateUser;
 
+  /**
+   * LAST_UPDATE_DATE
+   */
   @Column(name = "LAST_UPDATE_DATE", nullable = false)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate lastUpdateDate;
 
+  /**
+   * 行管部財編
+   */
   @Column(name = "NCCC_WEALTH_NO", length = 20)
   private String ncccWealthNo;
 
+  /**
+   * CONTACT LESS U
+   */
   @Column(name = "U_FLAG", length = 1)
   private String uFlag;
 
+  /**
+   * CONTACT LESS V
+   */
   @Column(name = "V_FLAG", length = 1)
   private String vFlag;
 
+  /**
+   * CONTACT LESS M
+   */
   @Column(name = "M_FLAG", length = 1)
   private String mFlag;
 
+  /**
+   * CONTACT LESS J
+   */
   @Column(name = "J_FLAG", length = 1)
   private String jFlag;
 
+  /**
+   * CONTACT LESS AE
+   */
   @Column(name = "AE_FLAG", length = 1)
   private String aeFlag;
 
-  @Column(name = "WAIT_DISCARD", length = 1)
-  private String waitDiscard;
-
+  /**
+   * Load Key flag
+   */
   @Column(name = "LOAD_KEY", length = 1)
   private String loadKey;
-
+  
+  /**
+   * 備機
+   */
   @Column(name = "WAIT_USE", length = 1)
   private String waitUse;
 
+  /**
+   * 待報廢
+   */
+  @Column(name = "WAIT_DISCARD", length = 1)
+  private String waitDiscard;
+
+  /**
+   * 維護廠商
+   */
   @Column(name = "MAIN_VENDOR_ID", length = 10)
   private String mainVendorId;
 
+  /**
+   * 是否為備援機(MFES)
+   */
   @Column(name = "BACKUP_FLAG", length = 1)
   private String backupFlag;
 
+  /**
+   * FES設備請款代碼
+   */
   @Column(name = "APPLY_CODE", length = 3)
   private String applyCode;
 
+  /**
+   * 啟用MFES自動下載
+   */
   @Column(name = "MFES_AUTO_DOWNLOAD_FLAG", length = 1)
   private String mfesAutoDownloadFlag;
 
+  /**
+   * KEY把數
+   */
   @Column(name = "KEY_COUNTS")
   private Integer keyCounts;
 
+  /**
+   * SmartPay Flag
+   */
   @Column(name = "SP_FLAG", length = 1)
   private String spFlag;
 
+  /**
+   * CUP Flag
+   */
   @Column(name = "C_FLAG", length = 1)
   private String cFlag;
 
+  /**
+   * 設備購買廠商
+   */
+  @Column(name = "EQ_VENDOR_ID", length = 10)
+  private String eqVendorId;
+
+  /**
+   * SAM 1 ID
+   */
+  @Column(name = "SAM_1_ID", length = 20)
+  private String sam1Id;
+
+  /**
+   * SAM 2 ID
+   */
+  @Column(name = "SAM_2_ID", length = 20)
+  private String sam2Id;
+
+  /**
+   * SAM 3 ID
+   */
+  @Column(name = "SAM_3_ID", length = 20)
+  private String sam3Id;
+
+  /**
+   * SAM 4 ID
+   */
+  @Column(name = "SAM_4_ID", length = 20)
+  private String sam4Id;
+
+  /**
+   * 停用原因
+   */
+  @Column(name = "CANCEL_REASON", length = 10)
+  private String cancelReason;
+
+  /**
+   * DFS卡別
+   */
+  @Column(name = "DFS_FLAG", length = 1)
+  private String dfsFlag;
+
+  /**
+   * EDC計價
+   */
+  @Column(name = "MAIN_FEE_EDC_TYPE", length = 1)
+  private String mainFeeEdcType;
+  
+  
   @Column(name = "EDC_SAM_ID", length = 20)
   private String edcSamId;
 
@@ -157,30 +330,7 @@ public class EmsMeqItem implements Serializable {
   @Column(name = "VENDOR_UPDATE_USER", length = 50)
   private String vendorUpdateUser;
 
-  @Column(name = "EQ_VENDOR_ID", length = 10)
-  private String eqVendorId;
-
-  @Column(name = "SAM_1_ID", length = 20)
-  private String sam1Id;
-
-  @Column(name = "SAM_2_ID", length = 20)
-  private String sam2Id;
-
-  @Column(name = "SAM_3_ID", length = 20)
-  private String sam3Id;
-
-  @Column(name = "SAM_4_ID", length = 20)
-  private String sam4Id;
-
-  @Column(name = "CANCEL_REASON", length = 10)
-  private String cancelReason;
-
-  @Column(name = "DFS_FLAG", length = 1)
-  private String dfsFlag;
-
-  @Column(name = "MAIN_FEE_EDC_TYPE", length = 1)
-  private String mainFeeEdcType;
-
+  
   @PrePersist
   @PreUpdate
   protected void onUpdate() {

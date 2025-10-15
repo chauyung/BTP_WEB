@@ -127,12 +127,20 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>com.sap.conn.jco</groupId>
 			<artifactId>sapjco3</artifactId>
 			<version>3.1.11</version>
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/sapjco3.jar</systemPath>
+		</dependency>
+		-->
+		<dependency>
+		    <groupId>com.sap.conn.jco</groupId>
+		    <artifactId>sapjco3</artifactId>
+		    <version>3.1.11</version>
+		    <scope>compile</scope>
 		</dependency>
 
 		<dependency>
